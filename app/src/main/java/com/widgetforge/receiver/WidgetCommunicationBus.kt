@@ -22,7 +22,7 @@ import com.widgetforge.engine.code.CodeWidgetEngineManager
  *   Extra PAYLOAD   : String — JSON payload string
  */
 class WidgetCommunicationBus : BroadcastReceiver() {
-    private const val TAG = "WidgetCommunicationBus"
+
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             ACTION_WIDGET_CHANNEL_MESSAGE -> handleChannelMessage(intent)
@@ -35,7 +35,7 @@ class WidgetCommunicationBus : BroadcastReceiver() {
         val channel = intent.getStringExtra(EXTRA_CHANNEL) ?: return
         val payload = intent.getStringExtra(EXTRA_PAYLOAD) ?: "{}"
 
-        Log.d(TAG, "Channel message: source=$sourceId channel=$channel")
+        Log.d(LOG_TAG, "Channel message: source=$sourceId channel=$channel")
 
         val message = WidgetChannelMessage(
             sourceWidgetId = sourceId,
@@ -50,12 +50,14 @@ class WidgetCommunicationBus : BroadcastReceiver() {
     private fun handleWidgetEvent(context: Context, intent: Intent) {
         val widgetId = intent.getIntExtra(EXTRA_SOURCE_ID, -1)
         val eventType = intent.getStringExtra(EXTRA_EVENT_TYPE) ?: return
-        Log.d(TAG, "Widget event: widgetId=$widgetId type=$eventType")
+        Log.d(LOG_TAG, "Widget event: widgetId=$widgetId type=$eventType")
         // Trigger update on the specific widget
         CodeWidgetEngineManager.triggerUpdate(context, widgetId)
     }
 
     companion object {
+        private const val LOG_TAG = "WidgetCommunicationBus"
+
         const val ACTION_WIDGET_CHANNEL_MESSAGE = "com.widgetforge.WIDGET_CHANNEL_MESSAGE"
         const val ACTION_WIDGET_EVENT = "com.widgetforge.WIDGET_EVENT"
         const val EXTRA_SOURCE_ID = "source_widget_id"

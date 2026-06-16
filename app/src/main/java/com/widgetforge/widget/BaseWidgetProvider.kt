@@ -5,11 +5,12 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import androidx.room.Room
 import com.widgetforge.data.db.WidgetForgeDatabase
 import com.widgetforge.data.models.GifWidgetConfig
 import com.widgetforge.data.models.ImageWidgetConfig
-import com.widgetforge.data.models.TextWidgetConfig
 import com.widgetforge.data.models.TextAlignment
+import com.widgetforge.data.models.TextWidgetConfig
 import com.widgetforge.data.models.WidgetType
 import com.widgetforge.data.repository.WidgetRegistry
 import com.widgetforge.engine.code.BundleExtractor
@@ -24,25 +25,25 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 /**
- * BaseWidgetProvider — shared logic for all four widget types.
+ * BaseWidgetProvider — shared onUpdate / onAppWidgetOptionsChanged / onDeleted logic.
  *
- * Routes onUpdate() to the correct rendering sub-module based on
- * the WidgetRegistry entry for each appWidgetId. Handles
- * onAppWidgetOptionsChanged for responsive resizing.
+ * AppWidgetProviders are not Hilt-injectable (they must have a no-arg constructor for
+ * the system to instantiate them). We therefore access the database through a
+ * process-level singleton holder [DbHolder] rather than Hilt injection.
  */
 abstract class BaseWidgetProvider : AppWidgetProvider() {
 
-    private val job = SupervisorJob()
+    private val job   = SupervisorJob()
     protected val scope = CoroutineScope(Dispatchers.IO + job)
+
+    // ── Update ──────────────────────────────────────────────────────────────
 
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        val db = WidgetForgeDatabase.getInstance(context)
-        val registry = WidgetRegistry(context, db)
-
+        val registry = registryFor(context)
         scope.launch {
             appWidgetIds.forEach { id ->
                 val entry = registry.getEntry(id)
@@ -52,20 +53,20 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
                 }
                 Log.d(TAG, "onUpdate: id=$id type=${entry.widgetType}")
 
-                val w = entry.pixelWidth.takeIf { it > 0 }
-                    ?: registry.dpToPx(entry.cellWidth * CELL_DP)
-                val h = entry.pixelHeight.takeIf { it > 0 }
-                    ?: registry.dpToPx(entry.cellHeight * CELL_DP)
+                val w = entry.pixelWidth.takeIf  { it > 0 } ?: registry.dpToPx(entry.cellWidth  * CELL_DP)
+                val h = entry.pixelHeight.takeIf { it > 0 } ?: registry.dpToPx(entry.cellHeight * CELL_DP)
 
                 when (entry.widgetType) {
-                    WidgetType.TEXT -> renderTextWidget(context, appWidgetManager, id, entry.sourceFilePath, w, h)
-                    WidgetType.IMAGE -> renderImageWidget(context, appWidgetManager, id, entry.sourceFilePath, w, h)
-                    WidgetType.GIF -> renderGifWidget(context, id, entry.sourceFilePath, w, h)
-                    WidgetType.CODE -> renderCodeWidget(context, id, entry.sourceFilePath, w, h)
+                    WidgetType.TEXT  -> renderText (context, appWidgetManager, id, entry.sourceFilePath, w, h)
+                    WidgetType.IMAGE -> renderImage(context, appWidgetManager, id, entry.sourceFilePath, w, h)
+                    WidgetType.GIF   -> renderGif  (context, id, entry.sourceFilePath, w, h)
+                    WidgetType.CODE  -> renderCode (context, id, entry.sourceFilePath)
                 }
             }
         }
     }
+
+    // ── Resize ──────────────────────────────────────────────────────────────
 
     override fun onAppWidgetOptionsChanged(
         context: Context,
@@ -73,31 +74,25 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle
     ) {
-        val minWidth = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+        val minWidth  = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
         val minHeight = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-
-        val db = WidgetForgeDatabase.getInstance(context)
-        val registry = WidgetRegistry(context, db)
+        val registry  = registryFor(context)
 
         scope.launch {
-            val widthPx = registry.dpToPx(minWidth)
+            val widthPx  = registry.dpToPx(minWidth)
             val heightPx = registry.dpToPx(minHeight)
             registry.updateDimensions(appWidgetId, widthPx, heightPx)
-
-            // Push new size to active engines
             CodeWidgetEngineManager.updateDimensions(appWidgetId, widthPx, heightPx)
             GifWidgetEngineManager.updateDimensions(appWidgetId, widthPx, heightPx)
-
-            Log.d(TAG, "Widget $appWidgetId resized → ${widthPx}x${heightPx}px")
-
-            // Re-render with new dimensions
+            Log.d(TAG, "Widget $appWidgetId resized → ${widthPx}×${heightPx}px")
             onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
         }
     }
 
+    // ── Delete ───────────────────────────────────────────────────────────────
+
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
-        val db = WidgetForgeDatabase.getInstance(context)
-        val registry = WidgetRegistry(context, db)
+        val registry = registryFor(context)
         scope.launch {
             appWidgetIds.forEach { id ->
                 registry.unregister(id)
@@ -108,104 +103,117 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         }
     }
 
-    // ── Rendering Dispatch ──────────────────────────────────────────────────
+    // ── Rendering helpers ────────────────────────────────────────────────────
 
-    private fun renderTextWidget(
+    private fun renderText(
         context: Context, manager: AppWidgetManager,
         id: Int, path: String, w: Int, h: Int
     ) {
         val config = parseTextConfig(path)
-        val views = TextWidgetRenderer.buildRemoteViews(context, config, w, h)
+        val views  = TextWidgetRenderer.buildRemoteViews(context, config, w, h)
         manager.updateAppWidget(id, views)
     }
 
-    private fun renderImageWidget(
+    private fun renderImage(
         context: Context, manager: AppWidgetManager,
         id: Int, path: String, w: Int, h: Int
     ) {
         val config = ImageWidgetConfig(imagePath = path)
-        val views = ImageWidgetRenderer.buildRemoteViews(context, config, w, h)
+        val views  = ImageWidgetRenderer.buildRemoteViews(context, config, w, h)
         manager.updateAppWidget(id, views)
     }
 
-    private fun renderGifWidget(
-        context: Context, id: Int, path: String, w: Int, h: Int
-    ) {
+    private fun renderGif(context: Context, id: Int, path: String, w: Int, h: Int) {
         val config = GifWidgetConfig(gifPath = path)
         GifWidgetEngineManager.start(context, id, config, w, h)
     }
 
-    private fun renderCodeWidget(
-        context: Context, id: Int, zipPath: String, w: Int, h: Int
-    ) {
-        if (!CodeWidgetEngineManager.isRunning(id)) {
-            val zipFile = File(zipPath)
-            if (!zipFile.exists()) {
-                Log.w(TAG, "ZIP bundle not found for widget $id: $zipPath")
-                return
-            }
-            val (bundleDir, manifest) = BundleExtractor.extract(context, zipFile, id) ?: return
-            CodeWidgetEngineManager.startEngine(context, id, bundleDir, manifest)
+    private fun renderCode(context: Context, id: Int, zipPath: String) {
+        if (CodeWidgetEngineManager.isRunning(id)) return
+        val zipFile = File(zipPath)
+        if (!zipFile.exists()) {
+            Log.w(TAG, "ZIP bundle not found for widget $id: $zipPath")
+            return
         }
+        val (bundleDir, manifest) = BundleExtractor.extract(context, zipFile, id) ?: return
+        CodeWidgetEngineManager.startEngine(context, id, bundleDir, manifest)
     }
 
-    // ── Text Config Parser (from .txt export format) ────────────────────────
+    // ── Text config parser (.txt export format) ───────────────────────────────
 
     private fun parseTextConfig(path: String): TextWidgetConfig {
         val file = File(path)
         if (!file.exists()) return TextWidgetConfig("Widget")
 
-        val lines = file.readLines()
-        var text = ""
-        var fontSize = 14f
-        var textColor = "#FFFFFF"
+        var fontSize        = 14f
+        var textColor       = "#FFFFFF"
         var backgroundColor = "#CC000000"
-        var bold = false
-        var italic = false
-        var alignment = TextAlignment.CENTER
+        var bold            = false
+        var italic          = false
+        var alignment       = TextAlignment.CENTER
+        var inHeader        = false
+        val bodyLines       = mutableListOf<String>()
 
-        var inHeader = false
-        val bodyLines = mutableListOf<String>()
-
-        lines.forEach { line ->
+        file.readLines().forEach { line ->
             when {
                 line == "---WIDGETFORGE_METADATA---" -> inHeader = true
-                line == "---END_METADATA---" -> inHeader = false
+                line == "---END_METADATA---"         -> inHeader = false
                 inHeader -> {
-                    val parts = line.split("=", limit = 2)
-                    if (parts.size == 2) {
-                        when (parts[0].trim()) {
-                            "fontSize" -> fontSize = parts[1].trim().toFloatOrNull() ?: 14f
-                            "textColor" -> textColor = parts[1].trim()
-                            "backgroundColor" -> backgroundColor = parts[1].trim()
-                            "bold" -> bold = parts[1].trim().toBoolean()
-                            "italic" -> italic = parts[1].trim().toBoolean()
-                            "alignment" -> alignment = TextAlignment.valueOf(
-                                parts[1].trim().uppercase()
-                            )
-                        }
+                    val kv = line.split("=", limit = 2)
+                    if (kv.size == 2) when (kv[0].trim()) {
+                        "fontSize"        -> fontSize        = kv[1].trim().toFloatOrNull() ?: 14f
+                        "textColor"       -> textColor       = kv[1].trim()
+                        "backgroundColor" -> backgroundColor = kv[1].trim()
+                        "bold"            -> bold            = kv[1].trim().toBoolean()
+                        "italic"          -> italic          = kv[1].trim().toBoolean()
+                        "alignment"       -> alignment       = runCatching {
+                            TextAlignment.valueOf(kv[1].trim().uppercase())
+                        }.getOrDefault(TextAlignment.CENTER)
                     }
                 }
                 else -> bodyLines.add(line)
             }
         }
-        text = bodyLines.joinToString("\n").trim()
 
-        return TextWidgetConfig(text, fontSize, textColor, backgroundColor, alignment, bold, italic)
+        return TextWidgetConfig(
+            text            = bodyLines.joinToString("\n").trim(),
+            fontSize        = fontSize,
+            textColor       = textColor,
+            backgroundColor = backgroundColor,
+            alignment       = alignment,
+            bold            = bold,
+            italic          = italic
+        )
     }
 
+    // ── Singleton DB / registry accessor ─────────────────────────────────────
+
+    private fun registryFor(context: Context): WidgetRegistry =
+        DbHolder.registryFor(context)
+
     companion object {
-        private const val TAG = "BaseWidgetProvider"
-        private const val CELL_DP = 74 // approximate dp per launcher cell
+        private const val TAG     = "BaseWidgetProvider"
+        private const val CELL_DP = 74 // approximate dp per standard launcher cell
     }
 }
 
-// ─── WidgetForgeDatabase singleton extension ─────────────────────────────────
+// ─── Process-level singleton for DB access from non-Hilt contexts ─────────────
 
-private fun WidgetForgeDatabase.Companion.getInstance(context: Context): WidgetForgeDatabase {
-    return androidx.room.Room.databaseBuilder(
-        context.applicationContext,
-        WidgetForgeDatabase::class.java,
-        WidgetForgeDatabase.DATABASE_NAME
-    ).allowMainThreadQueries().build()
+private object DbHolder {
+    @Volatile private var db:       WidgetForgeDatabase? = null
+    @Volatile private var registry: WidgetRegistry?      = null
+
+    fun registryFor(context: Context): WidgetRegistry {
+        return registry ?: synchronized(this) {
+            registry ?: run {
+                val appCtx = context.applicationContext
+                val newDb  = db ?: Room.databaseBuilder(
+                    appCtx,
+                    WidgetForgeDatabase::class.java,
+                    WidgetForgeDatabase.DATABASE_NAME
+                ).build().also { db = it }
+                WidgetRegistry(appCtx, newDb).also { registry = it }
+            }
+        }
+    }
 }

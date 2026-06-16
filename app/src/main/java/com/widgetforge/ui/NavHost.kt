@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.widgetforge.data.models.WidgetType
 import com.widgetforge.ui.dashboard.DashboardScreen
 import com.widgetforge.ui.editor.CodeEditorScreen
 import com.widgetforge.ui.editor.TextEditorScreen
@@ -35,11 +36,11 @@ fun WidgetForgeNavHost() {
                 onCreateGif = { navController.navigate(Routes.imagePicker(type = "GIF")) },
                 onCreateCode = { navController.navigate(Routes.codeEditor()) },
                 onEditWidget = { entry ->
-                    when (entry.widgetType.name) {
-                        "TEXT" -> navController.navigate(Routes.textEditor(entry.appWidgetId))
-                        "IMAGE" -> navController.navigate(Routes.imagePicker(entry.appWidgetId, "IMAGE"))
-                        "GIF" -> navController.navigate(Routes.imagePicker(entry.appWidgetId, "GIF"))
-                        "CODE" -> navController.navigate(Routes.codeEditor(entry.appWidgetId))
+                    when (entry.widgetType) {
+                        WidgetType.TEXT -> navController.navigate(Routes.textEditor(entry.appWidgetId))
+                        WidgetType.IMAGE -> navController.navigate(Routes.imagePicker(entry.appWidgetId, "IMAGE"))
+                        WidgetType.GIF -> navController.navigate(Routes.imagePicker(entry.appWidgetId, "GIF"))
+                        WidgetType.CODE -> navController.navigate(Routes.codeEditor(entry.appWidgetId))
                     }
                 }
             )

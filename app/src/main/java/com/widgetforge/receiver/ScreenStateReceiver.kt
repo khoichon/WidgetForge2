@@ -76,5 +76,4 @@ object WidgetVisibilityTracker {
         isVisible = true
     }
 
-    fun onScreenOff(context: Context) = onScreenOff()
 }
