@@ -53,10 +53,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '9.5.1'
-      - name: Generate Debug Keystore
-        run: |
-          keytool -genkey -v -keystore /home/runner/work/widgetforge/widgetforge/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
-    
       - name: Build Debug APK
         run: gradle assembleDebug
 
