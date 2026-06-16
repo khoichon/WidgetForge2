@@ -18,7 +18,6 @@ accompanist = "0.36.0"
 workManager = "2.9.1"
 datastore = "1.1.1"
 splashscreen = "1.0.1"
-material = { group = "com.google.android.material", name = "material", version = "1.12.0" }
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +48,7 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
+material = { group = "com.google.android.material", name = "material", version = "1.12.0" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
