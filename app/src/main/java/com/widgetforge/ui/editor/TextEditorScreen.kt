@@ -168,7 +168,11 @@ fun TextEditorScreen(
                     color = parsePreviewColor(textColor),
                     fontSize = fontSize.sp,
                     fontWeight = if (bold) FontWeight.Bold else FontWeight.Normal,
-                    textAlign = alignment
+                    textAlign = when (alignment) {
+		        Alignment.Start, Alignment.TopStart, Alignment.BottomStart -> TextAlign.Start
+			Alignment.End, Alignment.TopEnd, Alignment.BottomEnd -> TextAlign.End
+			else -> TextAlign.Center
+	    }
                 )
             }
 

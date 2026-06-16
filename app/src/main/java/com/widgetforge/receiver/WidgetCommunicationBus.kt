@@ -22,7 +22,7 @@ import com.widgetforge.engine.code.CodeWidgetEngineManager
  *   Extra PAYLOAD   : String — JSON payload string
  */
 class WidgetCommunicationBus : BroadcastReceiver() {
-
+    private const val TAG = "WidgetCommunicationBus"
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             ACTION_WIDGET_CHANNEL_MESSAGE -> handleChannelMessage(intent)
