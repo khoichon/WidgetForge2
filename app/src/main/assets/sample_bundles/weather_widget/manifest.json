@@ -1,0 +1,18 @@
+{
+  "id": "com.widgetforge.sample.weather",
+  "name": "Weather Widget",
+  "version": "1.0.0",
+  "author": "WidgetForge",
+  "description": "Subscribes to a weather channel and displays temperature/conditions",
+  "cellWidth": 2,
+  "cellHeight": 1,
+  "fps": 1,
+  "channels": [
+    {
+      "name": "weather",
+      "type": "SUBSCRIBE_ONLY",
+      "initialState": "{\"temp\": 22, \"condition\": \"Sunny\", \"humidity\": 65}"
+    }
+  ],
+  "assets": []
+}

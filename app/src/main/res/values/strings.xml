@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WidgetForge</string>
+    <string name="widget_text_label">Text Widget</string>
+    <string name="widget_image_label">Image Widget</string>
+    <string name="widget_gif_label">GIF Widget</string>
+    <string name="widget_code_label">Code Widget</string>
+    <string name="widget_description_text">Display custom styled text on your homescreen</string>
+    <string name="widget_description_image">Show a high-resolution image on your homescreen</string>
+    <string name="widget_description_gif">Animate a GIF on your homescreen</string>
+    <string name="widget_description_code">Run JavaScript canvas logic on your homescreen</string>
+</resources>

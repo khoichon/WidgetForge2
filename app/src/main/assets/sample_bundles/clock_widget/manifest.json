@@ -1,0 +1,12 @@
+{
+  "id": "com.widgetforge.sample.clock",
+  "name": "Animated Clock",
+  "version": "1.0.0",
+  "author": "WidgetForge",
+  "description": "A beautiful animated analog + digital clock widget",
+  "cellWidth": 2,
+  "cellHeight": 2,
+  "fps": 1,
+  "channels": [],
+  "assets": []
+}
