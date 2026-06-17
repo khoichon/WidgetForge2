@@ -82,5 +82,6 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.material)
     debugImplementation(libs.androidx.ui.tooling)
 }
