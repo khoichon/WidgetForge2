@@ -1,49 +1,42 @@
 package com.widgetforge.widget
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.room.Room
 import com.widgetforge.data.db.WidgetForgeDatabase
-import com.widgetforge.data.models.GifWidgetConfig
-import com.widgetforge.data.models.ImageWidgetConfig
-import com.widgetforge.data.models.TextAlignment
-import com.widgetforge.data.models.TextWidgetConfig
-import com.widgetforge.data.models.WidgetType
+import com.widgetforge.data.models.*
 import com.widgetforge.data.repository.WidgetRegistry
 import com.widgetforge.engine.code.BundleExtractor
 import com.widgetforge.engine.code.CodeWidgetEngineManager
 import com.widgetforge.engine.gif.GifWidgetEngineManager
 import com.widgetforge.engine.image.ImageWidgetRenderer
 import com.widgetforge.engine.text.TextWidgetRenderer
+import com.widgetforge.util.ImageMetadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.io.File
 
-/**
- * BaseWidgetProvider — shared onUpdate / onAppWidgetOptionsChanged / onDeleted logic.
- *
- * AppWidgetProviders are not Hilt-injectable (they must have a no-arg constructor for
- * the system to instantiate them). We therefore access the database through a
- * process-level singleton holder [DbHolder] rather than Hilt injection.
- */
 abstract class BaseWidgetProvider : AppWidgetProvider() {
 
     private val job   = SupervisorJob()
     protected val scope = CoroutineScope(Dispatchers.IO + job)
 
-    // ── Update ──────────────────────────────────────────────────────────────
+    // ── onUpdate: route each ID to the correct rendering engine ──────────────
 
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        val registry = registryFor(context)
+        val registry = DbHolder.registryFor(context)
         scope.launch {
             appWidgetIds.forEach { id ->
                 val entry = registry.getEntry(id)
@@ -51,14 +44,16 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
                     Log.w(TAG, "No registry entry for widget $id — skipping")
                     return@forEach
                 }
-                Log.d(TAG, "onUpdate: id=$id type=${entry.widgetType}")
 
                 val w = entry.pixelWidth.takeIf  { it > 0 } ?: registry.dpToPx(entry.cellWidth  * CELL_DP)
                 val h = entry.pixelHeight.takeIf { it > 0 } ?: registry.dpToPx(entry.cellHeight * CELL_DP)
 
+                // Build click PendingIntent if configured
+                val clickIntent = buildClickIntent(context, id, entry.onClickAction)
+
                 when (entry.widgetType) {
-                    WidgetType.TEXT  -> renderText (context, appWidgetManager, id, entry.sourceFilePath, w, h)
-                    WidgetType.IMAGE -> renderImage(context, appWidgetManager, id, entry.sourceFilePath, w, h)
+                    WidgetType.TEXT  -> renderText (context, appWidgetManager, id, entry.sourceFilePath, w, h, clickIntent)
+                    WidgetType.IMAGE -> renderImage(context, appWidgetManager, id, entry.sourceFilePath, w, h, clickIntent)
                     WidgetType.GIF   -> renderGif  (context, id, entry.sourceFilePath, w, h)
                     WidgetType.CODE  -> renderCode (context, id, entry.sourceFilePath)
                 }
@@ -66,7 +61,7 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         }
     }
 
-    // ── Resize ──────────────────────────────────────────────────────────────
+    // ── onAppWidgetOptionsChanged: respond to launcher resize ─────────────────
 
     override fun onAppWidgetOptionsChanged(
         context: Context,
@@ -76,7 +71,7 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
     ) {
         val minWidth  = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
         val minHeight = newOptions.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-        val registry  = registryFor(context)
+        val registry  = DbHolder.registryFor(context)
 
         scope.launch {
             val widthPx  = registry.dpToPx(minWidth)
@@ -84,47 +79,68 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
             registry.updateDimensions(appWidgetId, widthPx, heightPx)
             CodeWidgetEngineManager.updateDimensions(appWidgetId, widthPx, heightPx)
             GifWidgetEngineManager.updateDimensions(appWidgetId, widthPx, heightPx)
-            Log.d(TAG, "Widget $appWidgetId resized → ${widthPx}×${heightPx}px")
             onUpdate(context, appWidgetManager, intArrayOf(appWidgetId))
         }
     }
 
-    // ── Delete ───────────────────────────────────────────────────────────────
+    // ── onDeleted: clean up ───────────────────────────────────────────────────
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
-        val registry = registryFor(context)
+        val registry = DbHolder.registryFor(context)
         scope.launch {
             appWidgetIds.forEach { id ->
                 registry.unregister(id)
                 CodeWidgetEngineManager.stopEngine(id)
                 GifWidgetEngineManager.stop(id)
-                Log.d(TAG, "Widget $id deleted and unregistered")
+                Log.d(TAG, "Widget $id deleted")
             }
         }
     }
 
-    // ── Rendering helpers ────────────────────────────────────────────────────
+    // ── Rendering ─────────────────────────────────────────────────────────────
 
     private fun renderText(
         context: Context, manager: AppWidgetManager,
-        id: Int, path: String, w: Int, h: Int
+        id: Int, path: String, w: Int, h: Int,
+        clickIntent: PendingIntent?
     ) {
         val config = parseTextConfig(path)
         val views  = TextWidgetRenderer.buildRemoteViews(context, config, w, h)
+        clickIntent?.let { views.setOnClickPendingIntent(com.widgetforge.R.id.widget_image_view, it) }
         manager.updateAppWidget(id, views)
     }
 
     private fun renderImage(
         context: Context, manager: AppWidgetManager,
-        id: Int, path: String, w: Int, h: Int
+        id: Int, path: String, w: Int, h: Int,
+        clickIntent: PendingIntent?
     ) {
-        val config = ImageWidgetConfig(imagePath = path)
-        val views  = ImageWidgetRenderer.buildRemoteViews(context, config, w, h)
+        // Read metadata embedded in the PNG tEXt chunk
+        val meta = ImageMetadata.readPngMeta(File(path))
+        val config = ImageWidgetConfig(
+            imagePath       = path,
+            cornerRadius    = meta?.cornerRadius ?: 12f,
+            onClickAction   = meta?.onClickAction ?: "",
+            label           = meta?.label ?: "",
+            cellWidth       = meta?.cellWidth ?: 2,
+            cellHeight      = meta?.cellHeight ?: 2
+        )
+        val views = ImageWidgetRenderer.buildRemoteViews(context, config, w, h)
+        clickIntent?.let { views.setOnClickPendingIntent(com.widgetforge.R.id.widget_image_view, it) }
         manager.updateAppWidget(id, views)
     }
 
     private fun renderGif(context: Context, id: Int, path: String, w: Int, h: Int) {
-        val config = GifWidgetConfig(gifPath = path)
+        // Read metadata from GIF comment extension
+        val meta = ImageMetadata.readGifMeta(File(path))
+        val config = GifWidgetConfig(
+            gifPath         = path,
+            cornerRadius    = meta?.cornerRadius ?: 12f,
+            onClickAction   = meta?.onClickAction ?: "",
+            label           = meta?.label ?: "",
+            cellWidth       = meta?.cellWidth ?: 2,
+            cellHeight      = meta?.cellHeight ?: 2
+        )
         GifWidgetEngineManager.start(context, id, config, w, h)
     }
 
@@ -132,11 +148,48 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         if (CodeWidgetEngineManager.isRunning(id)) return
         val zipFile = File(zipPath)
         if (!zipFile.exists()) {
-            Log.w(TAG, "ZIP bundle not found for widget $id: $zipPath")
+            Log.w(TAG, "Bundle not found for widget $id: $zipPath")
             return
         }
         val (bundleDir, manifest) = BundleExtractor.extract(context, zipFile, id) ?: return
         CodeWidgetEngineManager.startEngine(context, id, bundleDir, manifest)
+    }
+
+    // ── onClick PendingIntent builder ─────────────────────────────────────────
+
+    private fun buildClickIntent(
+        context: Context,
+        appWidgetId: Int,
+        action: String
+    ): PendingIntent? {
+        if (action.isBlank()) return null
+        return try {
+            val intent: Intent = when {
+                action == "app://"          -> context.packageManager
+                    .getLaunchIntentForPackage(context.packageName)
+                    ?: return null
+
+                action.startsWith("https://") ||
+                action.startsWith("http://")  ->
+                    Intent(Intent.ACTION_VIEW, Uri.parse(action))
+
+                action.startsWith("intent://") ->
+                    Intent.parseUri(action, Intent.URI_INTENT_SCHEME)
+
+                else ->
+                    Intent(Intent.ACTION_VIEW, Uri.parse(action))
+            }
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            PendingIntent.getActivity(
+                context,
+                appWidgetId,          // unique requestCode per widget
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "buildClickIntent failed: ${e.message}")
+            null
+        }
     }
 
     // ── Text config parser (.txt export format) ───────────────────────────────
@@ -151,6 +204,8 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
         var bold            = false
         var italic          = false
         var alignment       = TextAlignment.CENTER
+        var padding         = 8
+        var onClickAction   = ""
         var inHeader        = false
         val bodyLines       = mutableListOf<String>()
 
@@ -166,9 +221,11 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
                         "backgroundColor" -> backgroundColor = kv[1].trim()
                         "bold"            -> bold            = kv[1].trim().toBoolean()
                         "italic"          -> italic          = kv[1].trim().toBoolean()
+                        "onClickAction"   -> onClickAction   = kv[1].trim()
                         "alignment"       -> alignment       = runCatching {
                             TextAlignment.valueOf(kv[1].trim().uppercase())
                         }.getOrDefault(TextAlignment.CENTER)
+                        "padding"         -> padding         = kv[1].trim().toIntOrNull() ?: 8
                     }
                 }
                 else -> bodyLines.add(line)
@@ -182,36 +239,32 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
             backgroundColor = backgroundColor,
             alignment       = alignment,
             bold            = bold,
-            italic          = italic
+            italic          = italic,
+            padding         = padding,
+            onClickAction   = onClickAction
         )
     }
 
-    // ── Singleton DB / registry accessor ─────────────────────────────────────
-
-    private fun registryFor(context: Context): WidgetRegistry =
-        DbHolder.registryFor(context)
-
     companion object {
         private const val TAG     = "BaseWidgetProvider"
-        private const val CELL_DP = 74 // approximate dp per standard launcher cell
+        private const val CELL_DP = 74
     }
 }
 
-// ─── Process-level singleton for DB access from non-Hilt contexts ─────────────
+// ─── Process-level singleton DB/Registry for non-Hilt contexts ───────────────
 
-private object DbHolder {
-    @Volatile private var db:       WidgetForgeDatabase? = null
-    @Volatile private var registry: WidgetRegistry?      = null
+object DbHolder {
+    @Volatile private var db: WidgetForgeDatabase? = null
+    @Volatile private var registry: WidgetRegistry? = null
 
     fun registryFor(context: Context): WidgetRegistry {
         return registry ?: synchronized(this) {
             registry ?: run {
                 val appCtx = context.applicationContext
                 val newDb  = db ?: Room.databaseBuilder(
-                    appCtx,
-                    WidgetForgeDatabase::class.java,
+                    appCtx, WidgetForgeDatabase::class.java,
                     WidgetForgeDatabase.DATABASE_NAME
-                ).build().also { db = it }
+                ).fallbackToDestructiveMigration().build().also { db = it }
                 WidgetRegistry(appCtx, newDb).also { registry = it }
             }
         }

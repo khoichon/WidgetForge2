@@ -2,17 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:name=".WidgetForgeApp"
@@ -28,9 +25,7 @@
         tools:targetApi="31">
 
         <!-- Main Activity -->
-        <activity
-            android:name=".ui.MainActivity"
-            android:exported="true"
+        <activity android:name=".ui.MainActivity" android:exported="true"
             android:theme="@style/Theme.WidgetForge.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,96 +34,136 @@
         </activity>
 
         <!-- Widget Configuration Activity -->
-        <activity
-            android:name=".ui.editor.WidgetConfigActivity"
-            android:exported="true"
+        <activity android:name=".ui.editor.WidgetConfigActivity" android:exported="true"
             android:theme="@style/Theme.WidgetForge">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
 
-        <!-- ===== AppWidget Providers ===== -->
+        <!-- ===== TEXT Widget Providers (1x1 → 5x5) ===== -->
+        <receiver android:name=".widget.TextWidget1x1Provider" android:exported="true" android:label="@string/widget_text_label_1x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_1x1_info"/></receiver>
+        <receiver android:name=".widget.TextWidget1x2Provider" android:exported="true" android:label="@string/widget_text_label_1x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_1x2_info"/></receiver>
+        <receiver android:name=".widget.TextWidget1x3Provider" android:exported="true" android:label="@string/widget_text_label_1x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_1x3_info"/></receiver>
+        <receiver android:name=".widget.TextWidget1x4Provider" android:exported="true" android:label="@string/widget_text_label_1x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_1x4_info"/></receiver>
+        <receiver android:name=".widget.TextWidget1x5Provider" android:exported="true" android:label="@string/widget_text_label_1x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_1x5_info"/></receiver>
+        <receiver android:name=".widget.TextWidget2x1Provider" android:exported="true" android:label="@string/widget_text_label_2x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_2x1_info"/></receiver>
+        <receiver android:name=".widget.TextWidget2x2Provider" android:exported="true" android:label="@string/widget_text_label_2x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_2x2_info"/></receiver>
+        <receiver android:name=".widget.TextWidget2x3Provider" android:exported="true" android:label="@string/widget_text_label_2x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_2x3_info"/></receiver>
+        <receiver android:name=".widget.TextWidget2x4Provider" android:exported="true" android:label="@string/widget_text_label_2x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_2x4_info"/></receiver>
+        <receiver android:name=".widget.TextWidget2x5Provider" android:exported="true" android:label="@string/widget_text_label_2x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_2x5_info"/></receiver>
+        <receiver android:name=".widget.TextWidget3x1Provider" android:exported="true" android:label="@string/widget_text_label_3x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_3x1_info"/></receiver>
+        <receiver android:name=".widget.TextWidget3x2Provider" android:exported="true" android:label="@string/widget_text_label_3x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_3x2_info"/></receiver>
+        <receiver android:name=".widget.TextWidget3x3Provider" android:exported="true" android:label="@string/widget_text_label_3x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_3x3_info"/></receiver>
+        <receiver android:name=".widget.TextWidget3x4Provider" android:exported="true" android:label="@string/widget_text_label_3x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_3x4_info"/></receiver>
+        <receiver android:name=".widget.TextWidget3x5Provider" android:exported="true" android:label="@string/widget_text_label_3x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_3x5_info"/></receiver>
+        <receiver android:name=".widget.TextWidget4x1Provider" android:exported="true" android:label="@string/widget_text_label_4x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_4x1_info"/></receiver>
+        <receiver android:name=".widget.TextWidget4x2Provider" android:exported="true" android:label="@string/widget_text_label_4x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_4x2_info"/></receiver>
+        <receiver android:name=".widget.TextWidget4x3Provider" android:exported="true" android:label="@string/widget_text_label_4x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_4x3_info"/></receiver>
+        <receiver android:name=".widget.TextWidget4x4Provider" android:exported="true" android:label="@string/widget_text_label_4x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_4x4_info"/></receiver>
+        <receiver android:name=".widget.TextWidget4x5Provider" android:exported="true" android:label="@string/widget_text_label_4x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_4x5_info"/></receiver>
+        <receiver android:name=".widget.TextWidget5x1Provider" android:exported="true" android:label="@string/widget_text_label_5x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_5x1_info"/></receiver>
+        <receiver android:name=".widget.TextWidget5x2Provider" android:exported="true" android:label="@string/widget_text_label_5x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_5x2_info"/></receiver>
+        <receiver android:name=".widget.TextWidget5x3Provider" android:exported="true" android:label="@string/widget_text_label_5x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_5x3_info"/></receiver>
+        <receiver android:name=".widget.TextWidget5x4Provider" android:exported="true" android:label="@string/widget_text_label_5x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_5x4_info"/></receiver>
+        <receiver android:name=".widget.TextWidget5x5Provider" android:exported="true" android:label="@string/widget_text_label_5x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/text_widget_5x5_info"/></receiver>
 
-        <!-- Text Widget Provider -->
-        <receiver
-            android:name=".widget.TextWidgetProvider"
-            android:exported="true"
-            android:label="@string/widget_text_label">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/text_widget_info" />
-        </receiver>
+        <!-- ===== IMAGE Widget Providers (1x1 → 5x5) ===== -->
+        <receiver android:name=".widget.ImageWidget1x1Provider" android:exported="true" android:label="@string/widget_image_label_1x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_1x1_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget1x2Provider" android:exported="true" android:label="@string/widget_image_label_1x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_1x2_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget1x3Provider" android:exported="true" android:label="@string/widget_image_label_1x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_1x3_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget1x4Provider" android:exported="true" android:label="@string/widget_image_label_1x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_1x4_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget1x5Provider" android:exported="true" android:label="@string/widget_image_label_1x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_1x5_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget2x1Provider" android:exported="true" android:label="@string/widget_image_label_2x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_2x1_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget2x2Provider" android:exported="true" android:label="@string/widget_image_label_2x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_2x2_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget2x3Provider" android:exported="true" android:label="@string/widget_image_label_2x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_2x3_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget2x4Provider" android:exported="true" android:label="@string/widget_image_label_2x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_2x4_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget2x5Provider" android:exported="true" android:label="@string/widget_image_label_2x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_2x5_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget3x1Provider" android:exported="true" android:label="@string/widget_image_label_3x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_3x1_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget3x2Provider" android:exported="true" android:label="@string/widget_image_label_3x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_3x2_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget3x3Provider" android:exported="true" android:label="@string/widget_image_label_3x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_3x3_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget3x4Provider" android:exported="true" android:label="@string/widget_image_label_3x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_3x4_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget3x5Provider" android:exported="true" android:label="@string/widget_image_label_3x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_3x5_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget4x1Provider" android:exported="true" android:label="@string/widget_image_label_4x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_4x1_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget4x2Provider" android:exported="true" android:label="@string/widget_image_label_4x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_4x2_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget4x3Provider" android:exported="true" android:label="@string/widget_image_label_4x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_4x3_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget4x4Provider" android:exported="true" android:label="@string/widget_image_label_4x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_4x4_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget4x5Provider" android:exported="true" android:label="@string/widget_image_label_4x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_4x5_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget5x1Provider" android:exported="true" android:label="@string/widget_image_label_5x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_5x1_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget5x2Provider" android:exported="true" android:label="@string/widget_image_label_5x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_5x2_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget5x3Provider" android:exported="true" android:label="@string/widget_image_label_5x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_5x3_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget5x4Provider" android:exported="true" android:label="@string/widget_image_label_5x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_5x4_info"/></receiver>
+        <receiver android:name=".widget.ImageWidget5x5Provider" android:exported="true" android:label="@string/widget_image_label_5x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/image_widget_5x5_info"/></receiver>
 
-        <!-- Image Widget Provider -->
-        <receiver
-            android:name=".widget.ImageWidgetProvider"
-            android:exported="true"
-            android:label="@string/widget_image_label">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/image_widget_info" />
-        </receiver>
+        <!-- ===== GIF Widget Providers (1x1 → 5x5) ===== -->
+        <receiver android:name=".widget.GifWidget1x1Provider" android:exported="true" android:label="@string/widget_gif_label_1x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_1x1_info"/></receiver>
+        <receiver android:name=".widget.GifWidget1x2Provider" android:exported="true" android:label="@string/widget_gif_label_1x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_1x2_info"/></receiver>
+        <receiver android:name=".widget.GifWidget1x3Provider" android:exported="true" android:label="@string/widget_gif_label_1x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_1x3_info"/></receiver>
+        <receiver android:name=".widget.GifWidget1x4Provider" android:exported="true" android:label="@string/widget_gif_label_1x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_1x4_info"/></receiver>
+        <receiver android:name=".widget.GifWidget1x5Provider" android:exported="true" android:label="@string/widget_gif_label_1x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_1x5_info"/></receiver>
+        <receiver android:name=".widget.GifWidget2x1Provider" android:exported="true" android:label="@string/widget_gif_label_2x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_2x1_info"/></receiver>
+        <receiver android:name=".widget.GifWidget2x2Provider" android:exported="true" android:label="@string/widget_gif_label_2x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_2x2_info"/></receiver>
+        <receiver android:name=".widget.GifWidget2x3Provider" android:exported="true" android:label="@string/widget_gif_label_2x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_2x3_info"/></receiver>
+        <receiver android:name=".widget.GifWidget2x4Provider" android:exported="true" android:label="@string/widget_gif_label_2x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_2x4_info"/></receiver>
+        <receiver android:name=".widget.GifWidget2x5Provider" android:exported="true" android:label="@string/widget_gif_label_2x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_2x5_info"/></receiver>
+        <receiver android:name=".widget.GifWidget3x1Provider" android:exported="true" android:label="@string/widget_gif_label_3x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_3x1_info"/></receiver>
+        <receiver android:name=".widget.GifWidget3x2Provider" android:exported="true" android:label="@string/widget_gif_label_3x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_3x2_info"/></receiver>
+        <receiver android:name=".widget.GifWidget3x3Provider" android:exported="true" android:label="@string/widget_gif_label_3x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_3x3_info"/></receiver>
+        <receiver android:name=".widget.GifWidget3x4Provider" android:exported="true" android:label="@string/widget_gif_label_3x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_3x4_info"/></receiver>
+        <receiver android:name=".widget.GifWidget3x5Provider" android:exported="true" android:label="@string/widget_gif_label_3x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_3x5_info"/></receiver>
+        <receiver android:name=".widget.GifWidget4x1Provider" android:exported="true" android:label="@string/widget_gif_label_4x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_4x1_info"/></receiver>
+        <receiver android:name=".widget.GifWidget4x2Provider" android:exported="true" android:label="@string/widget_gif_label_4x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_4x2_info"/></receiver>
+        <receiver android:name=".widget.GifWidget4x3Provider" android:exported="true" android:label="@string/widget_gif_label_4x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_4x3_info"/></receiver>
+        <receiver android:name=".widget.GifWidget4x4Provider" android:exported="true" android:label="@string/widget_gif_label_4x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_4x4_info"/></receiver>
+        <receiver android:name=".widget.GifWidget4x5Provider" android:exported="true" android:label="@string/widget_gif_label_4x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_4x5_info"/></receiver>
+        <receiver android:name=".widget.GifWidget5x1Provider" android:exported="true" android:label="@string/widget_gif_label_5x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_5x1_info"/></receiver>
+        <receiver android:name=".widget.GifWidget5x2Provider" android:exported="true" android:label="@string/widget_gif_label_5x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_5x2_info"/></receiver>
+        <receiver android:name=".widget.GifWidget5x3Provider" android:exported="true" android:label="@string/widget_gif_label_5x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_5x3_info"/></receiver>
+        <receiver android:name=".widget.GifWidget5x4Provider" android:exported="true" android:label="@string/widget_gif_label_5x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_5x4_info"/></receiver>
+        <receiver android:name=".widget.GifWidget5x5Provider" android:exported="true" android:label="@string/widget_gif_label_5x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/gif_widget_5x5_info"/></receiver>
 
-        <!-- GIF Widget Provider -->
-        <receiver
-            android:name=".widget.GifWidgetProvider"
-            android:exported="true"
-            android:label="@string/widget_gif_label">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/gif_widget_info" />
-        </receiver>
-
-        <!-- Code Widget Provider -->
-        <receiver
-            android:name=".widget.CodeWidgetProvider"
-            android:exported="true"
-            android:label="@string/widget_code_label">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/code_widget_info" />
-        </receiver>
+        <!-- ===== CODE Widget Providers (1x1 → 5x5) ===== -->
+        <receiver android:name=".widget.CodeWidget1x1Provider" android:exported="true" android:label="@string/widget_code_label_1x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_1x1_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget1x2Provider" android:exported="true" android:label="@string/widget_code_label_1x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_1x2_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget1x3Provider" android:exported="true" android:label="@string/widget_code_label_1x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_1x3_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget1x4Provider" android:exported="true" android:label="@string/widget_code_label_1x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_1x4_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget1x5Provider" android:exported="true" android:label="@string/widget_code_label_1x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_1x5_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget2x1Provider" android:exported="true" android:label="@string/widget_code_label_2x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_2x1_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget2x2Provider" android:exported="true" android:label="@string/widget_code_label_2x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_2x2_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget2x3Provider" android:exported="true" android:label="@string/widget_code_label_2x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_2x3_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget2x4Provider" android:exported="true" android:label="@string/widget_code_label_2x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_2x4_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget2x5Provider" android:exported="true" android:label="@string/widget_code_label_2x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_2x5_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget3x1Provider" android:exported="true" android:label="@string/widget_code_label_3x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_3x1_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget3x2Provider" android:exported="true" android:label="@string/widget_code_label_3x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_3x2_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget3x3Provider" android:exported="true" android:label="@string/widget_code_label_3x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_3x3_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget3x4Provider" android:exported="true" android:label="@string/widget_code_label_3x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_3x4_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget3x5Provider" android:exported="true" android:label="@string/widget_code_label_3x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_3x5_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget4x1Provider" android:exported="true" android:label="@string/widget_code_label_4x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_4x1_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget4x2Provider" android:exported="true" android:label="@string/widget_code_label_4x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_4x2_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget4x3Provider" android:exported="true" android:label="@string/widget_code_label_4x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_4x3_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget4x4Provider" android:exported="true" android:label="@string/widget_code_label_4x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_4x4_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget4x5Provider" android:exported="true" android:label="@string/widget_code_label_4x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_4x5_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget5x1Provider" android:exported="true" android:label="@string/widget_code_label_5x1"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_5x1_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget5x2Provider" android:exported="true" android:label="@string/widget_code_label_5x2"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_5x2_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget5x3Provider" android:exported="true" android:label="@string/widget_code_label_5x3"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_5x3_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget5x4Provider" android:exported="true" android:label="@string/widget_code_label_5x4"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_5x4_info"/></receiver>
+        <receiver android:name=".widget.CodeWidget5x5Provider" android:exported="true" android:label="@string/widget_code_label_5x5"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/code_widget_5x5_info"/></receiver>
 
         <!-- ===== Broadcast Receivers ===== -->
-
-        <!-- Cross-Widget Communication Bus -->
-        <receiver
-            android:name=".receiver.WidgetCommunicationBus"
-            android:exported="false">
+        <receiver android:name=".receiver.WidgetCommunicationBus" android:exported="false">
             <intent-filter>
                 <action android:name="com.widgetforge.WIDGET_EVENT" />
                 <action android:name="com.widgetforge.WIDGET_CHANNEL_MESSAGE" />
             </intent-filter>
         </receiver>
-
-        <!-- Screen State Receiver for Battery Optimization -->
-        <receiver
-            android:name=".receiver.ScreenStateReceiver"
-            android:exported="false">
+        <receiver android:name=".receiver.ScreenStateReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="android.intent.action.SCREEN_OFF" />
                 <action android:name="android.intent.action.USER_PRESENT" />
             </intent-filter>
         </receiver>
-
-        <!-- Boot Completed Receiver -->
-        <receiver
-            android:name=".receiver.BootReceiver"
-            android:exported="true">
+        <receiver android:name=".receiver.BootReceiver" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
@@ -136,18 +171,8 @@
         </receiver>
 
         <!-- ===== Services ===== -->
-
-        <!-- Code Widget Render Service -->
-        <service
-            android:name=".service.CodeWidgetRenderService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
-        <!-- GIF Render Service -->
-        <service
-            android:name=".service.GifWidgetRenderService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
+        <service android:name=".service.CodeWidgetRenderService" android:exported="false" android:foregroundServiceType="dataSync" />
+        <service android:name=".service.GifWidgetRenderService" android:exported="false" android:foregroundServiceType="dataSync" />
 
     </application>
 </manifest>
