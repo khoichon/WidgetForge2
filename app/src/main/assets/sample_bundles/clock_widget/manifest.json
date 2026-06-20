@@ -3,10 +3,12 @@
   "name": "Animated Clock",
   "version": "1.0.0",
   "author": "WidgetForge",
-  "description": "A beautiful animated analog + digital clock widget",
+  "description": "A beautiful animated analog + digital clock widget with a tap ripple effect",
   "cellWidth": 2,
   "cellHeight": 2,
-  "fps": 1,
+  "fps": 12,
+  "captureClickPosition": true,
+  "clickGridResolution": 6,
   "channels": [],
   "assets": []
 }

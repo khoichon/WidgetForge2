@@ -55,7 +55,7 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
                     WidgetType.TEXT  -> renderText (context, appWidgetManager, id, entry.sourceFilePath, w, h, clickIntent)
                     WidgetType.IMAGE -> renderImage(context, appWidgetManager, id, entry.sourceFilePath, w, h, clickIntent)
                     WidgetType.GIF   -> renderGif  (context, id, entry.sourceFilePath, w, h)
-                    WidgetType.CODE  -> renderCode (context, id, entry.sourceFilePath)
+                    WidgetType.CODE  -> renderCode (context, appWidgetManager, id, entry.sourceFilePath, entry.captureClickPosition, entry.clickGridResolution, clickIntent)
                 }
             }
         }
@@ -131,28 +131,45 @@ abstract class BaseWidgetProvider : AppWidgetProvider() {
     }
 
     private fun renderGif(context: Context, id: Int, path: String, w: Int, h: Int) {
-        // Read metadata from GIF comment extension
-        val meta = ImageMetadata.readGifMeta(File(path))
-        val config = GifWidgetConfig(
-            gifPath         = path,
-            cornerRadius    = meta?.cornerRadius ?: 12f,
-            onClickAction   = meta?.onClickAction ?: "",
-            label           = meta?.label ?: "",
-            cellWidth       = meta?.cellWidth ?: 2,
-            cellHeight      = meta?.cellHeight ?: 2
-        )
-        GifWidgetEngineManager.start(context, id, config, w, h)
+        // Always go through the foreground service so the engine survives
+        // process death (e.g. after a reboot, where this BroadcastReceiver's
+        // process is short-lived and gets killed once onUpdate() returns).
+        com.widgetforge.service.GifWidgetRenderService.start(context)
     }
 
-    private fun renderCode(context: Context, id: Int, zipPath: String) {
-        if (CodeWidgetEngineManager.isRunning(id)) return
-        val zipFile = File(zipPath)
+    private fun renderCode(
+        context: Context, manager: AppWidgetManager, id: Int, path: String,
+        captureClick: Boolean, gridRes: Int, clickIntent: PendingIntent?
+    ) {
+        val zipFile = File(path)
         if (!zipFile.exists()) {
-            Log.w(TAG, "Bundle not found for widget $id: $zipPath")
+            Log.w(TAG, "Bundle not found for widget $id: $path")
             return
         }
-        val (bundleDir, manifest) = BundleExtractor.extract(context, zipFile, id) ?: return
-        CodeWidgetEngineManager.startEngine(context, id, bundleDir, manifest)
+
+        if (captureClick) {
+            // Click-capture mode: the invisible tap-grid overlay owns all
+            // touch handling so taps resolve to an approximate (x, y)
+            // forwarded into the widget's JS onClick hook. The whole-widget
+            // onClickAction (if any) is intentionally NOT attached here —
+            // the two modes are mutually exclusive per widget.
+            val views = android.widget.RemoteViews(context.packageName, com.widgetforge.R.layout.widget_code)
+            CodeClickGridBuilder.apply(context, views, id, gridRes)
+            RemoteViewsCompat.applyPartial(manager, id, views)
+            CodeWidgetEngineManager.setClickGridConfig(id, true, gridRes)
+        } else if (clickIntent != null) {
+            // Whole-widget click mode: a single PendingIntent on the
+            // ImageView, same as TEXT/IMAGE widgets.
+            val views = android.widget.RemoteViews(context.packageName, com.widgetforge.R.layout.widget_code)
+            views.setOnClickPendingIntent(com.widgetforge.R.id.widget_image_view, clickIntent)
+            RemoteViewsCompat.applyPartial(manager, id, views)
+            CodeWidgetEngineManager.setWholeWidgetClickIntent(id, clickIntent)
+        } else {
+            CodeWidgetEngineManager.setClickGridConfig(id, false, gridRes)
+        }
+
+        // Always go through the foreground service — see renderGif() comment.
+        com.widgetforge.service.CodeWidgetRenderService.start(context)
     }
 
     // ── onClick PendingIntent builder ─────────────────────────────────────────

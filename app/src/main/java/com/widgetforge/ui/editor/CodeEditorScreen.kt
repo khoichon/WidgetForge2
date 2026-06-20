@@ -50,12 +50,14 @@ class CodeEditorViewModel @Inject constructor(
             val zip  = WidgetExportEngine.exportCodeWidget(manifest, mainJs, assetFiles, dir, name)
             registry.saveTemplate(
                 WidgetTemplate(
-                    widgetType     = WidgetType.CODE,
-                    sourceFilePath = zip.absolutePath,
-                    label          = label,
-                    cellWidth      = manifest.cellWidth,
-                    cellHeight     = manifest.cellHeight,
-                    onClickAction  = manifest.onClickAction
+                    widgetType           = WidgetType.CODE,
+                    sourceFilePath       = zip.absolutePath,
+                    label                = label,
+                    cellWidth            = manifest.cellWidth,
+                    cellHeight           = manifest.cellHeight,
+                    onClickAction        = manifest.onClickAction,
+                    captureClickPosition = manifest.captureClickPosition,
+                    clickGridResolution  = manifest.clickGridResolution
                 )
             )
         }
@@ -76,6 +78,8 @@ fun CodeEditorScreen(
     var mainJsCode    by remember { mutableStateOf(DEFAULT_MAIN_JS) }
     var channels      by remember { mutableStateOf("") }
     var onClickAction by remember { mutableStateOf("") }
+    var captureClick  by remember { mutableStateOf(false) }
+    var gridRes       by remember { mutableIntStateOf(6) }
     var assetUris     by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var saved         by remember { mutableStateOf(false) }
     var selectedTab   by remember { mutableIntStateOf(0) }
@@ -99,7 +103,8 @@ fun CodeEditorScreen(
                                 .map { ChannelConfig(name = it) }
                             val manifest = CodeWidgetManifest(
                                 name = widgetName, cellWidth = cellW, cellHeight = cellH,
-                                fps = fps, channels = channelList, onClickAction = onClickAction
+                                fps = fps, channels = channelList, onClickAction = onClickAction,
+                                captureClickPosition = captureClick, clickGridResolution = gridRes
                             )
                             viewModel.saveTemplate(manifest, mainJsCode, emptyList(), widgetName)
                             saved = true
@@ -140,9 +145,12 @@ fun CodeEditorScreen(
 
             when (selectedTab) {
                 0 -> CodeEditorTab(mainJsCode) { mainJsCode = it }
-                1 -> ManifestTab(widgetName, cellW, cellH, fps, channels, onClickAction,
+                1 -> ManifestTab(
+                    widgetName, cellW, cellH, fps, channels, onClickAction, captureClick, gridRes,
                     { widgetName = it }, { cellW = it }, { cellH = it },
-                    { fps = it }, { channels = it }, { onClickAction = it })
+                    { fps = it }, { channels = it }, { onClickAction = it },
+                    { captureClick = it }, { gridRes = it }
+                )
                 2 -> AssetsTab(assetUris) { assetLauncher.launch("*/*") }
                 3 -> DocsTab()
             }
@@ -180,8 +188,10 @@ private fun CodeEditorTab(code: String, onCodeChange: (String) -> Unit) {
 @Composable
 private fun ManifestTab(
     name: String, cellW: Int, cellH: Int, fps: Int, channels: String, onClickAction: String,
+    captureClick: Boolean, gridRes: Int,
     onName: (String) -> Unit, onW: (Int) -> Unit, onH: (Int) -> Unit,
-    onFps: (Int) -> Unit, onChannels: (String) -> Unit, onClickChange: (String) -> Unit
+    onFps: (Int) -> Unit, onChannels: (String) -> Unit, onClickChange: (String) -> Unit,
+    onCaptureClickChange: (Boolean) -> Unit, onGridResChange: (Int) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -217,6 +227,45 @@ private fun ManifestTab(
 
         OnClickActionField(onClickAction, onClickChange)
 
+        // ── Click position capture ──────────────────────────────────────────
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("Capture Click Position", fontSize = 13.sp, fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        "Calls onClick(x, y) in main.js instead of firing the action URI above. " +
+                        "x and y are normalized 0–1 across the widget.",
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(0.55f),
+                        lineHeight = 15.sp
+                    )
+                }
+                Switch(checked = captureClick, onCheckedChange = onCaptureClickChange)
+            }
+            if (captureClick) {
+                Spacer(Modifier.height(4.dp))
+                Text("Tap Grid Resolution: ${gridRes}×$gridRes", fontSize = 12.sp)
+                Slider(
+                    value = gridRes.toFloat(),
+                    onValueChange = { onGridResChange(it.toInt()) },
+                    valueRange = 3f..10f, steps = 6,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    "Higher = more precise tap position, at the cost of more invisible " +
+                    "tap regions overlaid on the widget. 6×6 is a good default.",
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(0.5f),
+                    lineHeight = 15.sp
+                )
+            }
+        }
+
         val previewJson = """
 {
   "name": "$name",
@@ -224,6 +273,8 @@ private fun ManifestTab(
   "cellHeight": $cellH,
   "fps": $fps,
   "onClickAction": "$onClickAction",
+  "captureClickPosition": $captureClick,
+  "clickGridResolution": $gridRes,
   "channels": [${channels.split(",").filter { it.isNotBlank() }.joinToString { "\"${it.trim()}\"" }}]
 }""".trimIndent()
 
@@ -290,6 +341,13 @@ function onChannelMessage(channel, payload) {
 function onWidgetPause()  { /* screen off */ }
 function onWidgetResume() { /* screen on  */ }
 function onResize(w, h)   { WIDTH=w; HEIGHT=h; }""".trim())
+        DocSection("Tap Position (requires Capture Click Position)", """
+// x, y are normalized 0-1 across the widget's current bounds
+function onClick(x, y) {
+  var px = x * WIDTH, py = y * HEIGHT;
+  lastTapX = px; lastTapY = py;
+  // e.g. spawn a particle at the tap point on the next draw() call
+}""".trim())
         DocSection("Loading Assets", """
 var img = new Image();
 img.src = 'assets/background.png';

@@ -6,11 +6,24 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.widgetforge.service.CodeWidgetRenderService
+import com.widgetforge.service.GifWidgetRenderService
 import com.widgetforge.widget.*
 
 /**
- * BootReceiver — re-triggers onUpdate for every registered provider after
- * device reboot or app self-update so homescreen widgets are repopulated.
+ * BootReceiver — restores animated widgets after device reboot or app update.
+ *
+ * Two things must happen, in order:
+ *  1. Start the foreground render services. These are the long-running
+ *     components that own the GIF/Code engine coroutine loops AND the only
+ *     valid place to dynamically register ScreenStateReceiver (manifest
+ *     registration of SCREEN_ON/OFF is forbidden on API 26+). Without a
+ *     foreground service holding the process alive, Android kills the
+ *     process shortly after the initial onUpdate() burst and the animation
+ *     silently stops forever — this was the root cause of widgets going
+ *     static after a reboot.
+ *  2. Re-broadcast ACTION_APPWIDGET_UPDATE so every provider repaints its
+ *     last-known frame immediately, before the engines spin back up.
  */
 class BootReceiver : BroadcastReceiver() {
 
@@ -18,9 +31,16 @@ class BootReceiver : BroadcastReceiver() {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED &&
             intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
 
-        Log.d(TAG, "Boot/update — refreshing all widget providers")
-        val manager = AppWidgetManager.getInstance(context)
+        Log.d(TAG, "Boot/update — restarting render services and refreshing widgets")
 
+        // 1. Restart the foreground services that own animation loops.
+        //    Each service's onCreate() re-registers ScreenStateReceiver and
+        //    re-initializes engines for every registry entry of its type.
+        CodeWidgetRenderService.start(context)
+        GifWidgetRenderService.start(context)
+
+        // 2. Repaint every placed widget immediately.
+        val manager = AppWidgetManager.getInstance(context)
         ALL_PROVIDERS.forEach { cls ->
             val ids = manager.getAppWidgetIds(ComponentName(context, cls))
             if (ids.isNotEmpty()) {

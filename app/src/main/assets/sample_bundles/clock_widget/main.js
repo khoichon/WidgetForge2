@@ -1,8 +1,8 @@
 /**
  * WidgetForge Sample: Animated Clock Widget
  *
- * Draws a minimal digital + analog clock.
- * Called once per second (fps: 1 in manifest).
+ * Draws an analog + digital clock with a tap-ripple effect that
+ * demonstrates the onClick(x, y) hook (manifest: captureClickPosition=true).
  *
  * API available:
  *   ctx          — HTML5 Canvas 2D context
@@ -12,6 +12,17 @@
  *   AndroidBridge.getChannelState(channel)
  *   AndroidBridge.log(message)
  */
+
+// ── Tap ripple state ────────────────────────────────────────────
+var ripples = []; // {x, y, age} in pixels / frames
+
+// Called automatically when the user taps the widget, IF
+// manifest.json sets captureClickPosition: true. x and y are
+// normalized [0,1] across the widget's current WIDTH/HEIGHT.
+function onClick(x, y) {
+    ripples.push({ x: x * WIDTH, y: y * HEIGHT, age: 0 });
+    if (ripples.length > 5) ripples.shift(); // cap concurrent ripples
+}
 
 function draw(ctx, WIDTH, HEIGHT) {
     var cx = WIDTH / 2;
@@ -79,6 +90,20 @@ function draw(ctx, WIDTH, HEIGHT) {
     ctx.font = (HEIGHT * 0.07) + 'px sans-serif';
     ctx.fillStyle = 'rgba(108,158,255,0.8)';
     ctx.fillText(dateStr, cx, HEIGHT * 0.97);
+
+    // ── Tap ripples (drawn on top, advanced + pruned each frame) ───
+    for (var i = ripples.length - 1; i >= 0; i--) {
+        var rp = ripples[i];
+        var progress = rp.age / 12; // ~1s lifespan at fps:12
+        if (progress >= 1) { ripples.splice(i, 1); continue; }
+        var radius = progress * Math.max(WIDTH, HEIGHT) * 0.4;
+        ctx.beginPath();
+        ctx.arc(rp.x, rp.y, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255,107,157,' + (1 - progress) + ')';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        rp.age++;
+    }
 }
 
 function drawHand(ctx, cx, cy, angle, length, width, color) {

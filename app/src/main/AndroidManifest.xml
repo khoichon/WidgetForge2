@@ -156,11 +156,16 @@
                 <action android:name="com.widgetforge.WIDGET_CHANNEL_MESSAGE" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.ScreenStateReceiver" android:exported="false">
+        <!--
+            ScreenStateReceiver is intentionally NOT declared here.
+            SCREEN_ON / SCREEN_OFF / USER_PRESENT are implicit broadcasts that
+            Android refuses to deliver to manifest-registered receivers since
+            API 26. It is registered dynamically at runtime by the foreground
+            render services (see ScreenStateReceiver.register()).
+        -->
+        <receiver android:name=".receiver.WidgetClickReceiver" android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.SCREEN_ON" />
-                <action android:name="android.intent.action.SCREEN_OFF" />
-                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="com.widgetforge.WIDGET_CLICKED" />
             </intent-filter>
         </receiver>
         <receiver android:name=".receiver.BootReceiver" android:exported="true">

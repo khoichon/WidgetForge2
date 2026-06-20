@@ -150,4 +150,6 @@ object GifWidgetEngineManager {
     fun pauseAll() { WidgetVisibilityTracker.onScreenOff() }
     fun resumeAll() { WidgetVisibilityTracker.onUserPresent() }
     fun updateDimensions(id: Int, w: Int, h: Int) { engines[id]?.updateDimensions(w, h) }
+    fun isRunning(appWidgetId: Int): Boolean = engines.containsKey(appWidgetId)
+    fun activeCount(): Int = engines.size
 }

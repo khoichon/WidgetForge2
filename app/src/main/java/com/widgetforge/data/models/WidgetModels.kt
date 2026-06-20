@@ -24,6 +24,8 @@ data class WidgetRegistryEntry(
     val pixelWidth: Int = 0,
     val pixelHeight: Int = 0,
     val onClickAction: String = "",   // URI/action fired when widget is tapped
+    val captureClickPosition: Boolean = false, // CODE widgets only: forward (x,y) to JS
+    val clickGridResolution: Int = 6,          // CODE widgets only: tap grid density
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
@@ -42,6 +44,8 @@ data class WidgetTemplate(
     val cellWidth: Int = 2,
     val cellHeight: Int = 2,
     val onClickAction: String = "",
+    val captureClickPosition: Boolean = false,
+    val clickGridResolution: Int = 6,
     val createdAt: Long = System.currentTimeMillis()
 )
 
@@ -56,7 +60,9 @@ data class CodeWidgetManifest(
     val cellWidth: Int = 2,
     val cellHeight: Int = 2,
     val fps: Int = 30,
-    val onClickAction: String = "",   // URI fired on tap
+    val onClickAction: String = "",          // URI fired on tap (whole-widget fallback)
+    val captureClickPosition: Boolean = false, // if true, taps invoke onClick(x,y) in JS instead
+    val clickGridResolution: Int = 6,         // NxN invisible tap grid (3-10); higher = more precise
     val channels: List<ChannelConfig> = emptyList(),
     val assets: List<String> = emptyList()
 )

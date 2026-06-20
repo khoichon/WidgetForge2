@@ -186,6 +186,25 @@ class CodeWidgetEngine(
         }
     }
 
+    /**
+     * Forward a tap on the widget into the script's onClick(x, y) hook.
+     * x and y are normalized to [0, 1] across the widget's current
+     * WIDTH/HEIGHT — multiply by WIDTH/HEIGHT inside the script for
+     * pixel coordinates, e.g.:
+     *   function onClick(x, y) {
+     *     var px = x * WIDTH, py = y * HEIGHT;
+     *   }
+     * Only meaningful when the manifest set captureClickPosition = true;
+     * otherwise the whole-widget onClickAction URI is used instead and
+     * this is never invoked.
+     */
+    fun deliverClick(normX: Float, normY: Float) {
+        val js = "if(window.onClick) window.onClick($normX, $normY);"
+        scope.launch(Dispatchers.Main) {
+            webView?.evaluateJavascript(js, null)
+        }
+    }
+
     // ── Internal helpers ────────────────────────────────────────────────────
 
     private fun injectBridgeAndStart() {

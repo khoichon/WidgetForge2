@@ -11,4 +11,925 @@
         android:scaleType="fitXY"
         android:adjustViewBounds="false" />
 
+    <!--
+        Invisible 10x10 tap grid, overlaid on the rendered canvas frame.
+        Only the first clickGridResolution x clickGridResolution cells are
+        given nonzero weight at render time (see CodeClickGridBuilder);
+        the rest collapse to zero size. Each visible cell carries its own
+        PendingIntent encoding its (row, col) so WidgetClickReceiver can
+        recover an approximate tap position and forward it into the
+        running JS engine as onClick(x, y) with x,y in [0,1] normalized
+        widget-relative coordinates.
+    -->
+    <GridLayout
+        android:id="@+id/click_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:rowCount="10"
+        android:columnCount="10"
+        android:useDefaultMargins="false">
+
+        <View
+            android:id="@+id/click_cell_0_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_0_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_1_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_2_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_3_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="3"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_4_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="4"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_5_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="5"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_6_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="6"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_7_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="7"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_8_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="8"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_0"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_3"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="3"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_4"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="4"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="5"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_6"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="6"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_7"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="7"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="8"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+        <View
+            android:id="@+id/click_cell_9_9"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="9"
+            android:layout_column="9"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:background="@android:color/transparent" />
+
+    </GridLayout>
+
 </FrameLayout>
